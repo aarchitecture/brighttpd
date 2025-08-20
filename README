@@ -1,0 +1,183 @@
+ _          _       _     _   _             _
+| |__  _ __(_) __ _| |__ | |_| |_ _ __   __| |
+| '_ \| '__| |/ _` | '_ \| __| __| '_ \ / _` |
+| |_) | |  | | (_| | | | | |_| |_| |_) | (_| |
+|_.__/|_|  |_|\__, |_| |_|\__|\__| .__/ \__,_|
+              |___/              |_|
+
+brighttpd is a small and fast static file server that i made to play with a few kernel toys like io_uring, kTLS, seccomp, and more.
+
+idk where to put this but it beats nginx btw (read bench/benchmark.txt and bench/benchmark_tls.txt)
+
+to reproduce this, run make bench and make bench-tls
+
+you can use the Makefile at the root of this repository to build brighttpd. to do so, simply run make.
+
+to run brighttpd, use brighttpd -c /path/to/brighttpd.conf (see more about the configuration format below)
+
+for a dry-run: brighttpd -c configuration -n
+
+the config format is like so (one directive per line, # comments):
+
+  listen [::]:8080
+  root /var/www/html
+
+the config file must be 0600 and owned by the runner of the process.
+
+the asset root must exist. if index.html or 404.html are missing, brighttpd uses fallback copies embedded into the binary.
+
+workers install a seccomp-bpf syscall filter after startup setup is done. this is always enabled and has no config directive.
+
+an example configuration is:
+
+  # plain http bind. required for plain http mode
+  # also required for tls mode if tls_redirect is yes
+  listen [::]:8080
+
+  # asset directory. index.html and 404.html may be provided here, otherwise
+  # embedded fallback pages are used
+  root /var/www
+
+  # optional custom mime map. if omitted, a decent set of defaults is used
+  mime_types /etc/nginx/mime.types
+
+  # privilege drop after binding sockets.
+  user www-data
+  group www-data
+
+  tls_listen [::]:8443
+  tls_p12 /etc/ssl/private/site.p12
+  tls_p12_passphrase password123
+  tls_redirect yes
+
+runtime behavior:
+
+  byte ranges
+    brighttpd supports single byte-range requests like Range: bytes=0-1023.
+    malformed ranges and multipart ranges are ignored and served as normal
+    200 responses. valid unsatisfiable ranges return 416.
+
+  seccomp
+    always enabled on worker threads after sockets, io_uring, pipes, and static
+    files are set up. there is intentionally no directive to disable it.
+
+all directives:
+
+  listen
+    the plain http bind address and port.
+    example: listen [::]:8080
+    required for plain http mode.
+    also required for tls mode when tls_redirect is yes.
+
+  tls_listen
+    the https bind address and port.
+    example: tls_listen [::]:8443
+    only used when tls_p12 is set.
+
+  root
+    the asset root on disk.
+    if index.html or 404.html are missing, embedded fallback pages linked into
+    the binary are used.
+
+  mime_types
+    path to an nginx-style mime.types file.
+    if omitted, brighttpd uses a set of defaults.
+
+  tls_p12
+    path to the pkcs#12 bundle for tls.
+    enables tls mode.
+    note: i don't support pem files because i'm just quirky. to convert your shitty pems to pkcs#12, run:
+      openssl pkcs12 -export -out bundle.p12 -inkey private.key -in cert.pem -certfile chain.pem -passout pass:<password>
+
+  tls_p12_passphrase
+    passphrase for the pkcs#12 bundle.
+    optional. omit it if the p12 is not encrypted.
+
+  tls_redirect
+    yes or no.
+    default is yes.
+    when yes, brighttpd starts a plain http listener on listen and returns redirects to the tls listener.
+    when no, brighttpd only starts the tls listener.
+
+  user
+    user to drop to after sockets are bound.
+    only works if the process started with enough privileges to drop user/group.
+
+  group
+    group to drop to after sockets are bound.
+
+  workers
+    number of worker threads, or auto.
+    default: auto
+
+  header_timeout
+    seconds allowed to finish receiving request headers.
+    default: 2
+
+  tls_handshake_timeout
+    seconds allowed to finish the tls handshake.
+    default: 3
+
+  keepalive_timeout
+    idle keep-alive timeout in seconds.
+    default: 5
+
+  response_timeout
+    max response lifetime in seconds before the connection gets closed.
+    default: 30
+
+  buffered_threshold
+    do not touch this unless you're measuring things and you actually know why.
+    files at or below this size are served from buffered reads instead of the splice path, in bytes.
+    default: 8192
+
+  ring_entries
+    do not touch this unless you're measuring things and you actually know why.
+    io_uring submission/completion queue size per worker.
+    default: 1024
+
+  request_buffer_size
+    do not touch this unless you're measuring things and you actually know why.
+    request header buffer size per connection, in bytes.
+    default: 8192
+
+  body_buffer_size
+    do not touch this unless you're measuring things and you actually know why.
+    buffered response chunk size per connection, in bytes.
+    default: 16384
+
+  max_connections
+    do not touch this unless you're measuring things and you actually know why.
+    max live connection slots per worker.
+    default: 512
+
+  listen_backlog
+    do not touch this unless you're measuring things and you actually know why.
+    listen backlog passed to listen(2).
+    default: 8192
+
+  submit_batch_threshold
+    do not touch this unless you're measuring things and you actually know why.
+    how many completions a worker handles before force-flushing queued uring
+    submissions.
+    default: 32
+
+  splice_chunk_size
+    do not touch this unless you're measuring things and you actually know why.
+    max chunk size for splice streaming paths, in bytes.
+    default: 1048576
+
+  idle_scan_interval
+    do not touch this unless you're measuring things and you actually know why.
+    how often workers scan for timed-out connections, in seconds.
+    default: 1
+
+  tcp_defer_accept
+    do not touch this unless you're measuring things and you actually know why.
+    value passed to TCP_DEFER_ACCEPT on listeners.
+    default: 1
+
+  tcp_fastopen
+    do not touch this unless you're measuring things and you actually know why.
+    value passed to TCP_FASTOPEN on listeners.
+    default: 4096

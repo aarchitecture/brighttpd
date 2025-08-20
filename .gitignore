@@ -1,0 +1,10 @@
+/brighttpd
+/brighttpd-asan
+/brighttpd.o
+/404_html.o
+/index_html.o
+
+/bench/logs/
+/bench/nginx.pid
+/bench/tmp/
+/bench/*.txt
