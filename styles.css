@@ -1,0 +1,52 @@
+body {
+  margin: 40px auto;
+  max-width: min(1400px, 80vw);
+  line-height: 1.6;
+  font-size: 18px;
+  color: #444;
+  padding: 0 10px;
+}
+
+h1,
+h2,
+h3 {
+  color: #222;
+  line-height: 1.2;
+}
+
+h3 {
+  text-align: center;
+}
+
+pre,
+code {
+  font-family: monospace;
+}
+
+pre {
+  padding: 10px;
+  background: #eee;
+}
+
+table {
+  display: block;
+  border-collapse: collapse;
+  overflow-x: auto;
+}
+
+th,
+td {
+  padding: 4px 6px;
+}
+
+.chart-frame {
+  height: 300px;
+}
+
+.good {
+  background: palegreen;
+}
+
+.bad {
+  background: tomato;
+}
