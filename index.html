@@ -23,8 +23,6 @@
     <h2>getting started</h2>
     <pre><code>make
 mkdir -p www
-printf '&lt;h1&gt;ok&lt;/h1&gt;\n' &gt; www/index.html
-printf 'not found\n' &gt; www/404.html
 
 umask 077
 cat &gt; brighttpd.conf &lt;&lt;'EOF'
@@ -37,12 +35,12 @@ EOF
 
     <h2>features</h2>
     <ul>
-      <li>static file root is indexed at startup; <code>index.html</code> and <code>404.html</code> are required.</li>
+      <li>static file root is indexed at startup; missing <code>index.html</code> and <code>404.html</code> fall back to pages embedded into the binary.</li>
       <li><code>GET</code> and <code>HEAD</code> over HTTP/1.0 and HTTP/1.1, with keep-alive and single range queries.</li>
       <li>io_uring accept/recv/send/read/splice/poll/timeout loop with fixed-file registration.</li>
       <li>buffered reads for small files, splice for larger plain HTTP responses, kTLS sendfile path for TLS.</li>
       <li>PKCS#12 TLS config, optional HTTP-to-HTTPS 308 redirects.</li>
-      <li>privilege drop, capability clearing, <code>PR_SET_NO_NEW_PRIVS</code>, <code>seccomp</code>, and connection timeouts.</li>
+      <li>privilege drop, capability clearing, <code>PR_SET_NO_NEW_PRIVS</code>, always-on <code>seccomp</code>, and connection timeouts.</li>
     </ul>
 
     <h2>benchmarks</h2>
