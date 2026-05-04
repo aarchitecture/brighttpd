@@ -13,15 +13,16 @@
     <script src="script.js" defer></script>
   </head>
   <body>
-    <h1>brighttpd</h1>
-    <p>
-      <a href="https://github.com/aarchitecture/brighttpd">brighttpd</a> is a
-      small and fast static file server that uses Linux kernel toys like
-      io_uring, splice, and kTLS.
-    </p>
+    <main>
+      <h1>brighttpd</h1>
+      <p>
+        <a href="https://github.com/aarchitecture/brighttpd">brighttpd</a> is a
+        small and fast static file server that uses Linux kernel toys like
+        io_uring, splice, and kTLS.
+      </p>
 
-    <h2>getting started</h2>
-    <pre><code>make
+      <h2>getting started</h2>
+      <pre><code>make
 mkdir -p www
 
 umask 077
@@ -33,45 +34,46 @@ EOF
 ./brighttpd -c brighttpd.conf -n
 ./brighttpd -c brighttpd.conf</code></pre>
 
-    <h2>features</h2>
-    <ul>
-      <li>static file root is indexed at startup; missing <code>index.html</code> and <code>404.html</code> fall back to pages embedded into the binary.</li>
-      <li><code>GET</code> and <code>HEAD</code> over HTTP/1.0 and HTTP/1.1, with keep-alive and single range queries.</li>
-      <li>io_uring accept/recv/send/read/splice/poll/timeout loop with fixed-file registration.</li>
-      <li>buffered reads for small files, splice for larger plain HTTP responses, kTLS sendfile path for TLS.</li>
-      <li>PKCS#12 TLS config, optional HTTP-to-HTTPS 308 redirects.</li>
-      <li>privilege drop, capability clearing, <code>PR_SET_NO_NEW_PRIVS</code>, always-on <code>seccomp</code>, and connection timeouts.</li>
-    </ul>
+      <h2>features</h2>
+      <ul>
+        <li>static file root is indexed at startup; missing <code>index.html</code> and <code>404.html</code> fall back to pages embedded into the binary.</li>
+        <li><code>GET</code> and <code>HEAD</code> over HTTP/1.0 and HTTP/1.1, with keep-alive and single range queries.</li>
+        <li>io_uring accept/recv/send/read/splice/poll/timeout loop with fixed-file registration.</li>
+        <li>buffered reads for small files, splice for larger plain HTTP responses, kTLS sendfile path for TLS.</li>
+        <li>PKCS#12 TLS config, optional HTTP-to-HTTPS 308 redirects.</li>
+        <li>privilege drop, capability clearing, <code>PR_SET_NO_NEW_PRIVS</code>, always-on <code>seccomp</code>, and connection timeouts.</li>
+      </ul>
 
-    <h2>benchmarks</h2>
-    <p>
-      ran with <code>make bench</code> and <code>make bench-tls</code> on
-      2026-04-29. machine: Alpine edge, Linux
-      <code>6.18.26-0-lts</code>, Intel i3-N305, 8GiB LPDDR5.
-      each benchmark used <code>wrk --latency</code> for 10 seconds on
-      localhost.
-    </p>
-    <p>
-      mixed means 90 percent <code>/small</code>, 9 percent
-      <code>/medium</code>, and 1 percent <code>/big</code>.
-      charts show actual req/s on one shared axis. HTTP and TLS are split
-      into separate charts.
-    </p>
+      <h2>benchmarks</h2>
+      <p>
+        ran with <code>make bench</code> and <code>make bench-tls</code> on
+        2026-04-29. machine: Alpine edge, Linux
+        <code>6.18.26-0-lts</code>, Intel i3-N305, 8GiB LPDDR5.
+        each benchmark used <code>wrk --latency</code> for 10 seconds on
+        localhost.
+      </p>
+      <p>
+        mixed means 90 percent <code>/small</code>, 9 percent
+        <code>/medium</code>, and 1 percent <code>/big</code>.
+        charts show actual req/s on one shared axis. HTTP and TLS are split
+        into separate charts.
+      </p>
 
-    <h3>http req/s</h3>
-    <div class="chart-frame">
-      <canvas id="http-chart"></canvas>
-    </div>
+      <h3>http req/s</h3>
+      <div class="chart-frame">
+        <canvas id="http-chart"></canvas>
+      </div>
 
-    <h3>tls req/s</h3>
-    <div class="chart-frame">
-      <canvas id="tls-chart"></canvas>
-    </div>
+      <h3>tls req/s</h3>
+      <div class="chart-frame">
+        <canvas id="tls-chart"></canvas>
+      </div>
 
-    <h3>http results</h3>
-    <div id="http-table"></div>
+      <h3>http results</h3>
+      <div id="http-table"></div>
 
-    <h3>tls results</h3>
-    <div id="tls-table"></div>
+      <h3>tls results</h3>
+      <div id="tls-table"></div>
+    </main>
   </body>
 </html>
