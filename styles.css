@@ -79,7 +79,7 @@ td {
 }
 
 .bad {
-  background: tomato;
+  background: lightsalmon;
 }
 
 @media (prefers-color-scheme: dark) {
